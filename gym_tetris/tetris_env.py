@@ -44,6 +44,7 @@ class TetrisEnv(NESEnv):
     def __init__(self,
         render_mode: str | None = None,
         b_type: bool = False,
+        level_9: bool = False,
         reward_score: bool = False,
         reward_lines: bool = True,
         penalize_height: bool = True,
@@ -65,6 +66,7 @@ class TetrisEnv(NESEnv):
         """
         super().__init__(_ROM_PATH, render_mode=render_mode)
         self._b_type = b_type
+        self._level_9 = level_9
         self._reward_score = reward_score
         self._current_score = 0
         self._reward_lines = reward_lines
@@ -196,6 +198,14 @@ class TetrisEnv(NESEnv):
             self._frame_advance(8)
             if self._b_type:
                 self._frame_advance(128)
+            elif self._level_9:
+                # Move to bottom right option
+                for _ in range(2):
+                    for __ in range(4):
+                        self._frame_advance(0)
+                        self._frame_advance(128)
+                    self._frame_advance(0)
+                    self._frame_advance(32)
             self._frame_advance(0)
 
     # MARK: nes-py API calls
