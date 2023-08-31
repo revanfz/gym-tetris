@@ -181,7 +181,12 @@ class TetrisEnv(NESEnv):
         board = board.any(axis=1)
         # take to sum to determine the height of the board
         return board.sum()
-
+    
+    @property
+    def is_piece_placed(self):
+        # Check if the play state is different than 1, which means that the piece is not controlled by the player.
+        return self.ram[0x0048] != 1
+        
     # MARK: RAM Hacks
 
     def _skip_start_screen(self):
@@ -259,6 +264,7 @@ class TetrisEnv(NESEnv):
             next_piece=self._next_piece,
             statistics=self._statistics,
             board_height=self._board_height,
+            is_piece_placed=self.is_piece_placed,
         )
 
 
