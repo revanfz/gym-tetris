@@ -131,6 +131,16 @@ class TetrisEnv(NESEnv):
     def _score(self):
         """Return the current score."""
         return self._read_bcd(0x0053, 3)
+    
+    @property
+    def _level(self):
+        """Return the current level."""
+        return self.ram[0x0044]
+    
+    @property
+    def _fall_timer(self):
+        """Return the current fall timer."""
+        return self.ram[0x0045]
 
     @property
     def _is_game_over(self):
@@ -197,21 +207,25 @@ class TetrisEnv(NESEnv):
             seed = self.np_random.randint(0, 255), self.np_random.randint(0, 255)
         # seed = self.np_random.randint(0, 255), self.np_random.randint(0, 255)
         # skip garbage screens
-        while self.ram[0x00C0] in {0, 1, 2, 3}:
+        while self.ram[0x00C0] in {0, 1}:
             # seed the random number generator
             self.ram[0x0017:0x0019] = seed
-            self._frame_advance(8)
-            if self._b_type:
-                self._frame_advance(128)
-            elif self._level_9:
-                # Move to bottom right option
-                for _ in range(2):
-                    for __ in range(4):
-                        self._frame_advance(0)
-                        self._frame_advance(128)
-                    self._frame_advance(0)
-                    self._frame_advance(32)
             self._frame_advance(0)
+            self._frame_advance(8)
+        assert self.ram[0x00C0] == 2, 'expected game type menu, got {}'.format(self.ram[0x00C0])
+        if self._b_type:
+            self._frame_advance(128)
+        self._frame_advance(0)
+        self._frame_advance(8)
+        if self._level_9:
+            # Move to bottom right option
+            for _ in range(6):
+                self._frame_advance(0)
+                self._frame_advance(128)
+            self._frame_advance(0)
+            self._frame_advance(32)
+        self._frame_advance(1)
+        self._frame_advance(9)
 
     # MARK: nes-py API calls
 
@@ -265,6 +279,9 @@ class TetrisEnv(NESEnv):
             statistics=self._statistics,
             board_height=self._board_height,
             is_piece_placed=self.is_piece_placed,
+            board=self._board,
+            level=self._level,
+            fall_timer=self._fall_timer,
         )
 
 
