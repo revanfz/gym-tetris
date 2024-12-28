@@ -183,7 +183,7 @@ class TetrisEnv(NESEnv):
 
     # MARK: RAM Hacks
 
-    def _skip_start_screen(self):
+    def _skip_start_screen(self, level):
         """Press and release start to skip the start screen."""
         # generate a random number for the Tetris RNG
         seed = 0, 0
