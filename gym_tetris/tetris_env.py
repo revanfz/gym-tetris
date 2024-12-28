@@ -48,6 +48,7 @@ class TetrisEnv(NESEnv):
         reward_lines: bool = True,
         penalize_height: bool = True,
         deterministic: bool = False,
+        level: int = 0,
     ) -> None:
         """
         Initialize a new Tetris environment.
@@ -74,7 +75,7 @@ class TetrisEnv(NESEnv):
         self.deterministic = True  # Always use a deterministic starting point.
         # reset the emulator, skip the start screen, and backup the state
         self.reset()
-        self._skip_start_screen()
+        self._skip_start_screen(level)
         self._backup()
         self.reset()
         # Set the deterministic flag after setting up the engine.
@@ -190,12 +191,32 @@ class TetrisEnv(NESEnv):
             seed = self.np_random.randint(0, 255), self.np_random.randint(0, 255)
         # seed = self.np_random.randint(0, 255), self.np_random.randint(0, 255)
         # skip garbage screens
-        while self.ram[0x00C0] in {0, 1, 2, 3}:
+        # while self.ram[0x00C0] in {0, 1, 2, 3}:
+        #     # seed the random number generator
+        #     self.ram[0x0017:0x0019] = seed
+        #     self._frame_advance(8)
+        #     if self._b_type:
+        #         self._frame_advance(128)
+        #     self._frame_advance(0)
+
+        while self.ram[0x00C0] in {0, 1, 2}:
             # seed the random number generator
             self.ram[0x0017:0x0019] = seed
             self._frame_advance(8)
             if self._b_type:
                 self._frame_advance(128)
+            self._frame_advance(0)
+        for _ in range(level % 10 + 2): # level + 2
+            self._frame_advance(128)
+            self._frame_advance(0)
+        # Level ( 0 - 9 )
+        if level < 10:
+            self._frame_advance(8) # start
+        # Level + 10
+        elif level < 20:
+            self._frame_advance(1)
+            self._frame_advance(9)
+            self._frame_advance(1)
             self._frame_advance(0)
 
     # MARK: nes-py API calls
