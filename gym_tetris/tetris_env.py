@@ -199,6 +199,7 @@ class TetrisEnv(NESEnv):
         #         self._frame_advance(128)
         #     self._frame_advance(0)
 
+        
         while self.ram[0x00C0] in {0, 1, 2}:
             # seed the random number generator
             self.ram[0x0017:0x0019] = seed
@@ -209,6 +210,10 @@ class TetrisEnv(NESEnv):
         for _ in range(level % 10 + 2): # level + 2
             self._frame_advance(128)
             self._frame_advance(0)
+        self._frame_advance(1)
+        if self._b_type:
+            for i in range(height):
+                self._frame_advance(128)
         # Level ( 0 - 9 )
         if level < 10:
             self._frame_advance(8) # start
@@ -217,6 +222,9 @@ class TetrisEnv(NESEnv):
             self._frame_advance(1)
             self._frame_advance(9)
             self._frame_advance(1)
+            self._frame_advance(0)
+
+        for i in range(6):
             self._frame_advance(0)
 
     # MARK: nes-py API calls
